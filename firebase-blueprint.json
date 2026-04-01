@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the typing test app.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique identifier of the user."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the user."
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "The profile picture URL of the user."
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "description": "When the user profile was created."
+        }
+      },
+      "required": ["uid", "displayName"]
+    },
+    "Score": {
+      "title": "Score",
+      "description": "A typing test score submitted by a user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique identifier of the user who submitted the score."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the user."
+        },
+        "wpm": {
+          "type": "number",
+          "description": "Words per minute."
+        },
+        "accuracy": {
+          "type": "number",
+          "description": "Typing accuracy percentage."
+        },
+        "time": {
+          "type": "number",
+          "description": "Time taken in seconds."
+        },
+        "timestamp": {
+          "type": "timestamp",
+          "description": "When the score was submitted."
+        }
+      },
+      "required": ["uid", "displayName", "wpm", "accuracy", "time", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles."
+    },
+    "/scores/{scoreId}": {
+      "schema": "Score",
+      "description": "Typing test scores."
+    }
+  }
+}
