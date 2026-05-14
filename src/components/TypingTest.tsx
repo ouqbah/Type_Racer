@@ -117,17 +117,41 @@ export const TypingTest: React.FC<{ onComplete: () => void }> = ({ onComplete })
     if (user) {
       setIsSubmitting(true);
       try {
-        await addDoc(collection(db, 'scores'), {
-          uid: user.uid,
-          displayName: user.displayName || 'Anonymous',
-          wpm: calculatedWpm,
-          accuracy: acc,
-          time: Number(timeTaken.toFixed(2)),
-          timestamp: serverTimestamp()
+        const response = await fetch('/api/scores', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uid: user.uid,
+            displayName: user.displayName || 'Anonymous',
+            wpm: calculatedWpm,
+            accuracy: acc,
+            time: Number(timeTaken.toFixed(2)),
+          }),
         });
+
+        if (!response.ok) {
+          throw new Error('Failed to save score');
+        }
+
         onComplete();
       } catch (error) {
-        handleFirestoreError(error, 'create', 'scores');
+        console.error('Error saving score:', error);
+        // Fallback to direct Firestore if API fails (optional, but good for stability)
+        try {
+          await addDoc(collection(db, 'scores'), {
+            uid: user.uid,
+            displayName: user.displayName || 'Anonymous',
+            wpm: calculatedWpm,
+            accuracy: acc,
+            time: Number(timeTaken.toFixed(2)),
+            timestamp: serverTimestamp()
+          });
+          onComplete();
+        } catch (fsError) {
+          handleFirestoreError(fsError, 'create', 'scores');
+        }
       } finally {
         setIsSubmitting(false);
       }

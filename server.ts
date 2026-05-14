@@ -1,6 +1,6 @@
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, addDoc } from 'firebase/firestore';
 import { db } from './src/firebase';
 import path from 'path';
 
@@ -32,6 +32,31 @@ async function startServer() {
     } catch (error) {
       console.error('Error fetching scores:', error);
       res.status(500).json({ error: 'Failed to fetch scores' });
+    }
+  });
+
+  app.post('/api/scores', async (req, res) => {
+    try {
+      const { uid, displayName, wpm, accuracy, time } = req.body;
+      
+      if (!uid || !wpm) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const scoreData = {
+        uid,
+        displayName: displayName || 'Anonymous',
+        wpm: Number(wpm),
+        accuracy: Number(accuracy),
+        time: Number(time),
+        timestamp: new Date() // Use server-side time
+      };
+
+      const docRef = await addDoc(collection(db, 'scores'), scoreData);
+      res.json({ id: docRef.id, ...scoreData });
+    } catch (error) {
+      console.error('Error saving score:', error);
+      res.status(500).json({ error: 'Failed to save score' });
     }
   });
 
